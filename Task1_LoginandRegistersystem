@@ -1,0 +1,101 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+// Function prototypes
+void registerUser();
+bool loginUser();
+bool checkUserExists(const string& username);
+string encryptPassword(const string& password);
+
+int main() {
+    int choice;
+    cout << "======================" << endl;
+    cout << "  Login System Menu" << endl;
+    cout << "======================" << endl;
+    cout << "1. Register\n2. Login\nChoose an option (1/2): ";
+    cin >> choice;
+
+    switch (choice) {
+        case 1:
+            registerUser();
+            break;
+        case 2:
+            if (loginUser()) {
+                cout << "Login successful!" << endl;
+            } else {
+                cout << "Login failed. Invalid credentials." << endl;
+            }
+            break;
+        default:
+            cout << "Invalid option selected." << endl;
+            break;
+    }
+    return 0;
+}
+
+// Check if the username is already registered
+bool checkUserExists(const string& username) {
+    ifstream file(username + ".txt");
+    return file.good();
+}
+
+// Register a new user
+void registerUser() {
+    string username, password;
+    cout << "Enter a username: ";
+    cin >> username;
+
+    // Check if the username already exists
+    if (checkUserExists(username)) {
+        cout << "Username already taken, please choose a different one." << endl;
+        return;
+    }
+
+    cout << "Enter a password: ";
+    cin >> password;
+
+    // Save username and encrypted password to a file
+    ofstream file(username + ".txt");
+    file << username << endl << encryptPassword(password) << endl;
+    file.close();
+
+    cout << "Registration successful!" << endl;
+}
+
+// Login an existing user
+bool loginUser() {
+    string username, password, storedPassword;
+    cout << "Enter your username: ";
+    cin >> username;
+
+    // Check if the user exists
+    if (!checkUserExists(username)) {
+        cout << "No such user found, please register first." << endl;
+        return false;
+    }
+
+    cout << "Enter your password: ";
+    cin >> password;
+
+    // Open the file to retrieve stored credentials
+    ifstream file(username + ".txt");
+    string storedUsername;
+    getline(file, storedUsername);
+    getline(file, storedPassword);
+    file.close();
+
+    // Compare entered password with stored password (after encryption)
+    return storedPassword == encryptPassword(password);
+}
+
+// Encrypt the password (simple Caesar cipher for demonstration)
+string encryptPassword(const string& password) {
+    string encryptedPassword = password;
+    for (char &c : encryptedPassword) {
+        c += 3;  // Shift each character by 3 (simple encryption)
+    }
+    return encryptedPassword;
+}
